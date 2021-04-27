@@ -1,0 +1,40 @@
+{
+    "led": [
+        {"blink": { "m": "selected-ch", "ch": 1 }},
+        {"blink": { "m": "selected-ch", "ch": 2 }},
+        {"blink": { "m": "selected-ch", "ch": 3 }},
+        {"blink": { "m": "selected-ch", "ch": 4 }},
+        {"blink": { "m": "selected-ch", "ch": 5 }},
+        {"blink": { "m": "selected-ch", "ch": 6 }},
+        {"blink": { "m": "selected-ch", "ch": 7 }},
+        {"blink": { "m": "selected-ch", "ch": 8 }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }},
+        {"color": { "m": "static"  }}
+    ],
+    "key": [
+        {"press": {"a": 1, "p1": 1}},
+        {"press": {"a": 1, "p1": 2}},
+        {"press": {"a": 1, "p1": 3}},
+        {"press": {"a": 1, "p1": 4}},
+        {"press": {"a": 1, "p1": 5}},
+        {"press": {"a": 1, "p1": 6}},
+        {"press": {"a": 1, "p1": 7}},
+        {"press": {"a": 1, "p1": 8}},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+    ]
+}

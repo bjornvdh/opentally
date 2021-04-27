@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include "keypad/keypad.h"
+#include "keypadeventhandler/keypadeventdef.h"
+#include "display/display_bootstatus.h"
 
 #define GPIO_FEED_ROW1 2
 #define GPIO_FEED_ROW2 17
@@ -14,74 +16,109 @@
 #define KEYPAD_NUM_ROWS 4
 #define KEYPAD_NUM_COLS 4
 
+#define KEYPAD_HWBUTTON1 35
+#define KEYPAD_HWBUTTON2 0
+
 #define DEBOUNCE_TIME 10 // mSec
-#define LONGPRESS_TIME 500 // mSec
+#define LONGPRESS_TIME 750 // mSec
 
 int _sense_cols[] = {GPIO_SENSE_COL1, GPIO_SENSE_COL2, GPIO_SENSE_COL3, GPIO_SENSE_COL4};
 int _feed_rows[] = {GPIO_FEED_ROW1, GPIO_FEED_ROW2, GPIO_FEED_ROW3, GPIO_FEED_ROW4};
 
-bool buttonIsPressed[16] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
-bool buttonStateChanged[16] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
-bool buttonLongPressedSent[16] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
-unsigned long buttonHoldOff[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-keypadEventDef keypadEvent;
-QueueHandle_t keypadQueue;
+uint8_t keyState[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+uint32_t keyHoldOff[18] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+KeypadEventDef keypadEvent;
+QueueHandle_t keypadEventQueue;
 
 void keypad_setup()
 {
-    pinMode(GPIO_SENSE_COL1, INPUT_PULLDOWN);
-    pinMode(GPIO_SENSE_COL2, INPUT_PULLDOWN);
-    pinMode(GPIO_SENSE_COL3, INPUT_PULLDOWN);
-    pinMode(GPIO_SENSE_COL4, INPUT_PULLDOWN);
+    display_bootstep("Starting keypad...");
+    pinMode(GPIO_SENSE_COL1, INPUT);
+    pinMode(GPIO_SENSE_COL2, INPUT);
+    pinMode(GPIO_SENSE_COL3, INPUT);
+    pinMode(GPIO_SENSE_COL4, INPUT);
+
+    pinMode(KEYPAD_HWBUTTON1, INPUT);
 
     pinMode(GPIO_FEED_ROW1, OUTPUT);
     pinMode(GPIO_FEED_ROW2, OUTPUT);
     pinMode(GPIO_FEED_ROW3, OUTPUT);
     pinMode(GPIO_FEED_ROW4, OUTPUT);
 
-    keypadQueue = xQueueCreate(KEYPAD_QUEUE_LEN, sizeof(keypadEventDef));
+    keypadEventQueue = xQueueCreate(KEYPAD_QUEUE_LEN, sizeof(KeypadEventDef));
+    display_bootstepresult(true);
+}
+
+uint8_t keypad_getkeystate(uint8_t numKey)
+{
+    return keyState[numKey];
+}
+
+inline void handleKeystate(uint32_t theTime, uint8_t numKey, bool keyIsPressed)
+{
+    uint8_t previousState = keyState[numKey];
+    if((!keyIsPressed && keyState[numKey] > KEYPAD_KEY_RELEASED) || (keyIsPressed && keyState[numKey] == KEYPAD_KEY_RELEASED))
+    {
+        // The key was not pressed and is now pressed or
+        // the key was pressed and is now not pressed.
+        keyHoldOff[numKey] = theTime + DEBOUNCE_TIME;
+        keyState[numKey] = keyIsPressed ? KEYPAD_KEY_PRESSED :  KEYPAD_KEY_RELEASED;
+        keypadEvent.eventType = keyState[numKey];
+        keypadEvent.eventTime = theTime;
+        keypadEvent.previousState = previousState;
+        keypadEvent.numKey = numKey;
+
+        while(xQueueSend(keypadEventQueue, (void*)&keypadEvent, 500) != pdTRUE);                            
+    }
+    else if(keyIsPressed  && keyState[numKey] == KEYPAD_KEY_PRESSED && (theTime - keyHoldOff[numKey]) > LONGPRESS_TIME)
+    {
+        // The key has been pressed for a while.
+        keyState[numKey] = KEYPAD_KEY_LONGPRESSED;
+        keypadEvent.eventTime = theTime;
+        keypadEvent.eventType = KEYPAD_KEY_LONGPRESSED;
+        keypadEvent.previousState = previousState;
+        keypadEvent.numKey = numKey;
+
+        while(xQueueSend(keypadEventQueue, (void*)&keypadEvent, 500) != pdTRUE);
+    }
 }
 
 void keypad_task(void* parameters)
 {
     while(true)
     {
+        uint32_t theTime = millis();
         // Scan the keypad row by row
         for(uint8_t numRow = 0; numRow < KEYPAD_NUM_ROWS; numRow++)
         {
-            uint32_t theTime = millis();
             digitalWrite(_feed_rows[numRow], HIGH);
+
+            // And read all columns
             for(uint8_t numCol = 0; numCol < KEYPAD_NUM_COLS; numCol++)
             {
-                uint8_t numButton = (numCol) + (numRow * 4);
-                if(buttonHoldOff[numButton] < theTime)
+                uint8_t numKey = (numCol) + (numRow * 4);
+                if(keyHoldOff[numKey] < theTime) // Key is not being debounced
                 {
-                    bool buttonState = digitalRead(_sense_cols[numCol]);
-                    if(buttonState != buttonIsPressed[numButton])
-                    {
-                        buttonHoldOff[numButton] = theTime + DEBOUNCE_TIME;
-                        buttonStateChanged [numButton] = true;
-                        buttonIsPressed[numButton] = buttonState;
-                        buttonLongPressedSent[numButton] = false;
-                        keypadEvent.eventType = buttonState ? KEYPAD_EVENT_PRESSED :  KEYPAD_EVENT_RELEASED;
-                        keypadEvent.eventTime = theTime;
-                        keypadEvent.numKey = numButton;
-
-                        while(xQueueSend(keypadQueue, (void*)&keypadEvent, 500) != pdTRUE);                            
-                    }
-                    else if(buttonState == true && !buttonLongPressedSent[numButton] && (theTime - buttonHoldOff[numButton]) > LONGPRESS_TIME)
-                    {
-                        buttonLongPressedSent[numButton] = true;
-                        keypadEvent.eventTime = theTime;
-                        keypadEvent.eventType = KEYPAD_EVENT_LONGPRESSED;
-                        keypadEvent.numKey = numButton;
-
-                        while(xQueueSend(keypadQueue, (void*)&keypadEvent, 500) != pdTRUE);
-                    }
+                    bool keyIsPressed = (digitalRead(_sense_cols[numCol]) == 1);
+                    handleKeystate(theTime, numKey, keyIsPressed);
                 }
             }
             digitalWrite(_feed_rows[numRow], LOW);
+        }
+
+        // Scan the two physical buttons on the UC itself
+        if(keyHoldOff[16] < theTime) // Key is not being debounced
+        {
+            bool keyIsPressed = !digitalRead(KEYPAD_HWBUTTON1); // Default high for HW buttons.
+            handleKeystate(theTime, 16, keyIsPressed);
+        }
+
+        if(keyHoldOff[17] < theTime) // Key is not being debounced
+        {
+            bool keyIsPressed = !digitalRead(KEYPAD_HWBUTTON2); // Default high for HW buttons.
+            handleKeystate(theTime, 17, keyIsPressed);
         }
 
         // Go and do something else now.
