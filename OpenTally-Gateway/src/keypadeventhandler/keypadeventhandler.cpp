@@ -36,11 +36,11 @@ void keypadeventhandler_task(void* parameters)
 
                 if(keypadEvent.previousState == KEYPAD_KEY_PRESSED) // Single short press
                 {
-                    ConfigAction action = config_getkeypressedaction(keypadEvent.numKey);
-                    switch(action.Action)
+                    KeyConfig cfg = config_getkeyconfig(keypadEvent.numKey);
+                    switch(cfg.OnPress.Action)
                     {
                         case ACTION_SELECT_CHANNEL:
-                            uistate_setselectedchannel(action.ActionParam1);
+                            uistate_setselectedchannel(cfg.OnPress.ActionParam1);
                             break;
                     }
                 }

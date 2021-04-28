@@ -1,12 +1,12 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
+#include <Arduino_JSON.h>
 #include <SPIFFS.h>
 #include "display/display_bootstatus.h"
 #include "config/config.h"
 
-StaticJsonDocument<8192> jsonDoc;
-JsonArray jsonKeys;
 bool configIsValid = false;
+
+KeyConfig _keys[18];
 
 void config_setup()
 {
@@ -19,39 +19,29 @@ void config_setup()
         while(1) yield();   // Halt
     }
 
-    DeserializationError error = deserializeJson(jsonDoc, jsonFile);
+    JSONVar root = JSON.parse(jsonFile.readString());
     jsonFile.close();
 
-    if(error)
+    if(root.hasOwnProperty("key"))
     {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.f_str());        
-        configIsValid = false;
-        display_bootstepresult(false);
-        while(1) yield();   // Halt
+        for(int i = 0; i < 18; i++)
+        {
+            JSONVar jsonKey = root["key"][i];
+            _keys[i].OnPress.Action = jsonKey["p"]["a"];
+            _keys[i].OnPress.ActionParam1 = jsonKey["p"]["p1"];
+            _keys[i].OnPress.ActionParam2 = jsonKey["p"]["p2"];
+        }
+        display_bootstepresult(true);
     }
     else
     {
-        jsonKeys = jsonDoc["key"].to<JsonArray>();
-        configIsValid = true;
-        display_bootstepresult(true);
+        Serial.println("Key element not found in config JSON.");
+        display_bootstepresult(false);
+        while(1) yield();   // Halt        
     }
 }
 
-ConfigAction config_getkeypressedaction(uint8_t numKey)
-{
-    // TODO: This crashes. Find out why. 
-    ConfigAction retVal;
-    
-    JsonObject theKey = jsonKeys[numKey];
-
-    if(theKey.containsKey("press"))
-    {
-        JsonObject pressJson = theKey["press"];
-        if(pressJson.containsKey("a")) retVal.Action = pressJson["a"];
-        if(pressJson.containsKey("p1")) retVal.Action = pressJson["p1"];
-        //if(pressJson.containsKey("p2")) retVal.Action = pressJson["p2"];
-    }
-
-    return retVal;
+KeyConfig config_getkeyconfig(uint8_t numKey)
+{   
+    return _keys[numKey];
 }
