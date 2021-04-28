@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <Arduino_JSON.h>
+#include <ArduinoJSON.h>
 #include <SPIFFS.h>
 #include "display/display_bootstatus.h"
 #include "config/config.h"
@@ -19,17 +19,22 @@ void config_setup()
         while(1) yield();   // Halt
     }
 
-    JSONVar root = JSON.parse(jsonFile.readString());
+    DynamicJsonDocument root(8192);
+    deserializeJson(root, jsonFile);
     jsonFile.close();
 
-    if(root.hasOwnProperty("key"))
+    if(root.containsKey("key"))
     {
+        Serial.println("[config] Found key element.");
         for(int i = 0; i < 18; i++)
         {
-            JSONVar jsonKey = root["key"][i];
-            _keys[i].OnPress.Action = jsonKey["p"]["a"];
-            _keys[i].OnPress.ActionParam1 = jsonKey["p"]["p1"];
-            _keys[i].OnPress.ActionParam2 = jsonKey["p"]["p2"];
+            Serial.print("[config] Settings for this key: ");
+            JsonObject jsonKey = root["key"][i];
+            _keys[i].OnPress.Action = jsonKey["p"]["a"].as<int>();
+            _keys[i].OnPress.ActionParam1 = jsonKey["p"]["p1"].as<int>();
+            _keys[i].OnPress.ActionParam2 = jsonKey["p"]["p2"].as<String>();
+            Serial.print(_keys[i].OnPress.ActionParam2);
+            Serial.println(".");            
         }
         display_bootstepresult(true);
     }

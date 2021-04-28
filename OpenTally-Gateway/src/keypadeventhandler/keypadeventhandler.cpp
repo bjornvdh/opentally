@@ -37,10 +37,17 @@ void keypadeventhandler_task(void* parameters)
                 if(keypadEvent.previousState == KEYPAD_KEY_PRESSED) // Single short press
                 {
                     KeyConfig cfg = config_getkeyconfig(keypadEvent.numKey);
+                    Serial.print("Action for this key: ");
+                    Serial.print(cfg.OnPress.Action);
+                    Serial.print(" - p1,p2: ");
+                    Serial.print(cfg.OnPress.ActionParam1);
+                    Serial.print(", ");
+                    Serial.println(cfg.OnPress.ActionParam2);
                     switch(cfg.OnPress.Action)
                     {
-                        case ACTION_SELECT_CHANNEL:
-                            uistate_setselectedchannel(cfg.OnPress.ActionParam1);
+                        case (int)KeyAction::SelectChannel:
+                            Serial.println("Select new channel.");
+                            uistate_setselectedchannel(cfg.OnPress.ActionParam1, (ToggleModeEnum)cfg.OnPress.ActionParam2.toInt());
                             break;
                     }
                 }
