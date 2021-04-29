@@ -1,8 +1,10 @@
 #include "leds.h"
 #include "keypad/keypad.h"
+#include "config/config.h"
+#include "uistate/uistate_selectedchannel.h"
 #include <FastLED.h>
 
-#define LEDS_SLOW_BLINK_INTERVAL 750
+#define LEDS_SLOW_BLINK_INTERVAL 500
 #define LEDS_FAST_BLINK_INTERVAL 50
 
 #define NUM_LEDS 16
@@ -10,8 +12,14 @@
 
 CRGB leds[NUM_LEDS];
 
+const uint8_t COLOR_BASECOLOR[3] = {0,0,25};
+const uint8_t COLOR_SELECTED_CHANNEL[3] = {255,200,0};
+const uint8_t COLOR_PREVIEW[3] = {115,255,0};
+const uint8_t COLOR_PROGRAM[3] = {255,0,0};
+
 uint32_t lastSlowBlinkToggle;
 uint32_t lastFastBlinkToggle;
+uint8_t _selectedChannel;
 
 bool ledsRefreshIsRequested = false;
 bool slowBlinkState = false;
@@ -37,24 +45,42 @@ void updateBlink()
     }    
 }
 
-void refreshSetBaseColor()
+inline void setLedColor(int numLed, const uint8_t ledColor[3])
 {
-    for(int numLed = 0; numLed < NUM_LEDS; numLed++)
-    {
-        leds[numLed].setRGB(0,0,25);
-    }    
+    leds[numLed][0] = ledColor[0];
+    leds[numLed][1] = ledColor[1];
+    leds[numLed][2] = ledColor[2];
 }
 
-void refreshOverrideKeypad()
+inline void setModeBasedLedColor(int numLed, LEDModeConfig modeConfig)
 {
-    for(int numLed = 0; numLed < NUM_LEDS; numLed++)
+    switch(modeConfig.Mode)
     {
-        int keyState = keypad_getkeystate(numLed);
-        if(keyState == KEYPAD_KEY_PRESSED || (keyState == KEYPAD_KEY_LONGPRESSED && fastBlinkState))  // Pressed or longpressed
-        {
-            leds[numLed].setRGB(255,255,255);
-        }
-    }        
+        case LedMode::None:
+            break;
+        case LedMode::ProgramPreview:
+            // TODO
+            break;
+        case LedMode::SelectedChannel:
+            if(modeConfig.Param1 == _selectedChannel) setLedColor(numLed, COLOR_SELECTED_CHANNEL);
+    }
+}
+
+inline void refreshSetBaseColor(int numLed, LEDConfig ledConfig)
+{
+    if(ledConfig.BaseColor)
+        leds[numLed].setRGB(0,0,25);
+    else
+        leds[numLed].setRGB(0,0,0);
+}
+
+inline void refreshOverrideKeypad(int numLed)
+{
+    int keyState = keypad_getkeystate(numLed);
+    if(keyState == KEYPAD_KEY_PRESSED || (keyState == KEYPAD_KEY_LONGPRESSED && fastBlinkState))  // Pressed or longpressed
+    {
+        leds[numLed].setRGB(255,255,255);
+    }
 }
 
 void leds_request_refresh()
@@ -72,7 +98,7 @@ void leds_setup()
     ledsRefreshRequestMutex = xSemaphoreCreateMutex();
 
     FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS); 
-    refreshSetBaseColor();
+    //refreshSetBaseColor();
     FastLED.show();    
 }
 
@@ -81,11 +107,18 @@ void leds_task(void* parameters)
     while(true)
     {
         updateBlink();
-
+        _selectedChannel = uistate_getselectedchannel();
         if(ledsRefreshIsRequested)
         {
-            refreshSetBaseColor();
-            refreshOverrideKeypad();
+            for(int numLed = 0; numLed < 16; numLed++)
+            {
+                LEDConfig config = config_getledconfig(numLed);
+                refreshSetBaseColor(numLed, config);
+                setModeBasedLedColor(numLed, config.SolidColor);
+                if(slowBlinkState) setModeBasedLedColor(numLed, config.Blink);
+                refreshOverrideKeypad(numLed);
+            }
+
             FastLED.show();
         }
 

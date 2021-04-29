@@ -12,10 +12,10 @@ uint8_t uistate_getselectedchannel()
 
 void uistate_setselectedchannel(uint8_t numChannel, ToggleModeEnum toggleMode)
 {   
-    Serial.print("Selecting new channel: ");
-    Serial.print(numChannel);
-    Serial.print(" with togglemode ");
-    Serial.println((int)toggleMode);
+    // Serial.print("Selecting new channel: ");
+    // Serial.print(numChannel);
+    // Serial.print(" with togglemode ");
+    // Serial.println((int)toggleMode);
 
     xSemaphoreTake(selectedChannelMutex, portMAX_DELAY);
     if(selectedChannel == numChannel && (toggleMode == ToggleModeEnum::SetOff || toggleMode == ToggleModeEnum::Toggle))
