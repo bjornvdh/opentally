@@ -2,6 +2,7 @@
 #include "net/net.h"
 #include "display/display.h"
 #include "display/display_bootstatus.h"
+#include "sleep/sleep.h"
 
 #include <Preferences.h>
 #include <Arduino.h>
@@ -60,6 +61,11 @@ void net_task(void* parameters)
 {
     while(true)
     {
+        if(sleepInitiated) {
+            taskYIELD();
+            continue;  // Do not respond to WiFi events when going to sleep.
+        }
+
         wm.process();
         if(!wm.getWebPortalActive())
             wm.startWebPortal();

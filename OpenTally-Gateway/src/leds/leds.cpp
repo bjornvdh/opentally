@@ -2,6 +2,9 @@
 #include "keypad/keypad.h"
 #include "config/config.h"
 #include "uistate/uistate_selectedchannel.h"
+#include "uistate/uistate_programpreview.h"
+#include "sleep/sleep.h"
+
 #include <FastLED.h>
 
 #define LEDS_SLOW_BLINK_INTERVAL 500
@@ -14,7 +17,7 @@ CRGB leds[NUM_LEDS];
 
 const uint8_t COLOR_BASECOLOR[3] = {0,0,25};
 const uint8_t COLOR_SELECTED_CHANNEL[3] = {255,200,0};
-const uint8_t COLOR_PREVIEW[3] = {115,255,0};
+const uint8_t COLOR_PREVIEW[3] = {0,180,0};
 const uint8_t COLOR_PROGRAM[3] = {255,0,0};
 
 uint32_t lastSlowBlinkToggle;
@@ -52,17 +55,26 @@ inline void setLedColor(int numLed, const uint8_t ledColor[3])
     leds[numLed][2] = ledColor[2];
 }
 
-inline void setModeBasedLedColor(int numLed, LEDModeConfig modeConfig)
+void setModeBasedLedColor(int numLed, LEDModeConfig modeConfig)
 {
     switch(modeConfig.Mode)
     {
         case LedMode::None:
             break;
-        case LedMode::ProgramPreview:
-            // TODO
-            break;
-        case LedMode::SelectedChannel:
+        case LedMode::SelectedChannel: 
             if(modeConfig.Param1 == _selectedChannel) setLedColor(numLed, COLOR_SELECTED_CHANNEL);
+            break;            
+        case LedMode::ProgramPreview:
+            bool previewState = uistate_getchannelpreviewstate(modeConfig.Param1);
+            bool programState = uistate_getchannelprogramstate(modeConfig.Param1);
+
+            if(programState)
+                setLedColor(numLed, COLOR_PROGRAM);
+            else if(previewState)
+                setLedColor(numLed, COLOR_PREVIEW);
+
+            break;
+
     }
 }
 
@@ -106,6 +118,14 @@ void leds_task(void* parameters)
 {
     while(true)
     {
+        if(sleepInitiated)
+        {
+            // If we go to sleep, turn off all leds and do nothing more.
+            FastLED.clear(true);
+            taskYIELD();
+            continue;  
+        } 
+
         updateBlink();
         _selectedChannel = uistate_getselectedchannel();
         if(ledsRefreshIsRequested)

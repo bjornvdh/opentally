@@ -55,8 +55,12 @@ void config_setup()
         {
             JsonObject jsonKey = root["key"][i];
             _keys[i].OnPress.Action = (KeyAction)jsonKey["p"]["a"].as<int>();
-            _keys[i].OnPress.ActionParam1 = jsonKey["p"]["p1"].as<int>();
-            _keys[i].OnPress.ActionParam2 = jsonKey["p"]["p2"].as<String>();
+            _keys[i].OnPress.Param1 = jsonKey["p"]["p1"].as<int>();
+            _keys[i].OnPress.Param2 = jsonKey["p"]["p2"].as<String>();
+
+            _keys[i].OnLongpress.Action = (KeyAction)jsonKey["lp"]["a"].as<int>();
+            _keys[i].OnLongpress.Param1 = jsonKey["lp"]["p1"].as<int>();
+            _keys[i].OnLongpress.Param2 = jsonKey["lp"]["p2"].as<String>();
         }
     }
     else

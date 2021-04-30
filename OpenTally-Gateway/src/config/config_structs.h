@@ -20,8 +20,8 @@ struct LEDConfig
 struct ConfigAction
 {
     KeyAction Action;
-    int ActionParam1;
-    String ActionParam2;
+    int Param1;
+    String Param2;
 };
 
 struct KeyConfig

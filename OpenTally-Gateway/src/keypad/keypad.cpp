@@ -2,6 +2,7 @@
 #include "keypad/keypad.h"
 #include "keypadeventhandler/keypadeventdef.h"
 #include "display/display_bootstatus.h"
+#include "sleep/sleep.h"
 
 #define GPIO_FEED_ROW1 2
 #define GPIO_FEED_ROW2 17
@@ -89,6 +90,12 @@ void keypad_task(void* parameters)
 {
     while(true)
     {
+        if(sleepInitiated){
+            // If we go to sleep, do nothing with the keypad.
+            taskYIELD();
+            continue;
+        }
+
         uint32_t theTime = millis();
         // Scan the keypad row by row
         for(uint8_t numRow = 0; numRow < KEYPAD_NUM_ROWS; numRow++)

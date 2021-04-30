@@ -3,6 +3,7 @@
 #include "display/display_fonts.h"
 #include "display/display_draw_generic.h"
 #include "display/display_bootstatus.h"
+#include "sleep/sleep.h"
 
 #include <SPIFFS.h>
 #include <TFT_eSPI.h>
@@ -70,18 +71,19 @@ void display_setup()
         display_bootstepresult(true);
         Serial.println("\r\nFonts found OK.");
     }
-
-    // tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    // tft.loadFont(AA_FONT_SMALL);
-    // tft.setCursor(10,55);
-    // tft.println("Starting up...");    
-    // tft.unloadFont(); 
 }
 
 void display_task(void* parameters)
 {
     while(true)
     {
+        if(sleepInitiated)
+        {
+            // If we go to sleep, do nothing with the display.
+            taskYIELD();
+            continue;
+        } 
+
         uint32_t theTime = millis();
 
         if(theTime - lastDisplayBlinkToggle > DISPLAY_BLINK_INTERVAL)

@@ -41,6 +41,8 @@ enum class KeyAction
     
     OnAirCountdown = 6,             // Toggle between "off air", "on air" and "count down to on air"
                                     //      P1: Mode - 0 (off air), 1 (count down), 2 (on air), 3 (cycle between off air, count down, on air)
+
+    DeepSleep = 7,                  // Turn off the device.
 };
 
 #endif
