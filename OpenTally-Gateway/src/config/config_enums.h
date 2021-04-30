@@ -39,7 +39,7 @@ enum class KeyAction
                                     //      P1: Channel number (0 for currently selected channel).
                                     //      P2: Mode - 0 (off), 1 (on), 2 (toggle on/off)
     
-    OnAirCountdown = 6,             // Toggle between "off air", "on air" and "count down to on air"
+    SetOnAirState = 6,              // Toggle between "off air", "on air" and "count down to on air"
                                     //      P1: Mode - 0 (off air), 1 (count down), 2 (on air), 3 (cycle between off air, count down, on air)
 
     DeepSleep = 7,                  // Turn off the device.

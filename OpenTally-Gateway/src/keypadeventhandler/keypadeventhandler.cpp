@@ -2,9 +2,10 @@
 #include "keypadeventhandler/keypadeventdef.h"
 #include "keypad/keypad.h"
 #include "leds/leds.h"
-#include "config/config.h"
-#include "uistate/uistate_selectedchannel.h"
-#include "uistate/uistate_programpreview.h"
+#include "config/config_gateway.h"
+#include "state/state_selectedchannel.h"
+#include "state/state_programpreview.h"
+#include "state/state_onair.h"
 #include "sleep/sleep.h"
 
 extern QueueHandle_t keypadEventQueue;
@@ -21,12 +22,7 @@ uint8_t getTheChannel(int numChannel)
     if(numChannel > 0)
         return numChannel;
     else
-        return uistate_getselectedchannel();
-}
-
-inline ToggleModeEnum toToggleMode(String param2)
-{
-    
+        return state_getselectedchannel();
 }
 
 inline bool getNewState(String param2, bool currentState)
@@ -57,26 +53,37 @@ void process_keyaction(KeypadEventDef keypadEvent, ConfigAction actionCfg)
             sleep_start();
             break;
         case KeyAction::SelectChannel:
-            uistate_setselectedchannel(actionCfg.Param1, (ToggleModeEnum)actionCfg.Param2.toInt());
+            state_setselectedchannel(actionCfg.Param1, (ToggleModeEnum)actionCfg.Param2.toInt());
             break;
         case KeyAction::SetPreview:
             numChannel = getTheChannel(actionCfg.Param1);    // 0 for Param1 means the currently selected channel.
             if(numChannel > 0)  
             {
-                currentState = uistate_getchannelpreviewstate(numChannel);
+                currentState = state_getchannelpreviewstate(numChannel);
                 newState = getNewState(actionCfg.Param2, currentState);
-                if(newState != currentState)uistate_setchannelpreviewstate(numChannel, newState);
+                if(newState != currentState)state_setchannelpreviewstate(numChannel, newState);
             }
             break;
         case KeyAction::SetProgram:
             numChannel = getTheChannel(actionCfg.Param1);    // 0 for Param1 means the currently selected channel.
             if(numChannel > 0)  
             {
-                currentState = uistate_getchannelprogramstate(numChannel);
+                currentState = state_getchannelprogramstate(numChannel);
                 newState = getNewState(actionCfg.Param2, currentState);
-                if(newState != currentState)uistate_setchannelprogramstate(numChannel, newState);
+                if(newState != currentState)state_setchannelprogramstate(numChannel, newState);
             }
             break;
+        case KeyAction::SetOnAirState:
+            int newState = actionCfg.Param1;
+            if(newState > 2)
+            {
+                newState = ((int)onair_getstate()) + 1;
+                if(newState > 2)
+                    newState = 0;                
+            }
+            
+            onair_setstate((OnAirState) newState);
+            break;            
     }
 }
 

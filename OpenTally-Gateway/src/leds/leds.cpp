@@ -1,8 +1,8 @@
 #include "leds.h"
 #include "keypad/keypad.h"
-#include "config/config.h"
-#include "uistate/uistate_selectedchannel.h"
-#include "uistate/uistate_programpreview.h"
+#include "config/config_gateway.h"
+#include "state/state_selectedchannel.h"
+#include "state/state_programpreview.h"
 #include "sleep/sleep.h"
 
 #include <FastLED.h>
@@ -29,6 +29,7 @@ bool slowBlinkState = false;
 bool fastBlinkState = false;
 
 static SemaphoreHandle_t ledsRefreshRequestMutex;
+static portMUX_TYPE criticalMutex = portMUX_INITIALIZER_UNLOCKED;
 
 void updateBlink()
 {
@@ -65,8 +66,8 @@ void setModeBasedLedColor(int numLed, LEDModeConfig modeConfig)
             if(modeConfig.Param1 == _selectedChannel) setLedColor(numLed, COLOR_SELECTED_CHANNEL);
             break;            
         case LedMode::ProgramPreview:
-            bool previewState = uistate_getchannelpreviewstate(modeConfig.Param1);
-            bool programState = uistate_getchannelprogramstate(modeConfig.Param1);
+            bool previewState = state_getchannelpreviewstate(modeConfig.Param1);
+            bool programState = state_getchannelprogramstate(modeConfig.Param1);
 
             if(programState)
                 setLedColor(numLed, COLOR_PROGRAM);
@@ -127,7 +128,7 @@ void leds_task(void* parameters)
         } 
 
         updateBlink();
-        _selectedChannel = uistate_getselectedchannel();
+        _selectedChannel = state_getselectedchannel();
         if(ledsRefreshIsRequested)
         {
             for(int numLed = 0; numLed < 16; numLed++)
@@ -139,7 +140,15 @@ void leds_task(void* parameters)
                 refreshOverrideKeypad(numLed);
             }
 
+            //vTaskEnterCritical(&criticalMutex);
             FastLED.show();
+            //vTaskExitCritical(&criticalMutex);
+
+            xSemaphoreTake(ledsRefreshRequestMutex, portMAX_DELAY);
+            ledsRefreshIsRequested = false;
+            xSemaphoreGive(ledsRefreshRequestMutex);
+
+            vTaskDelay(25);      
         }
 
         // Once per 10ms is more than enough

@@ -1,16 +1,16 @@
 #include <Arduino.h>
-#include "config/config.h"
-#include "uistate/uistate_selectedchannel.h"
+#include "config/config_gateway.h"
+#include "state/state_selectedchannel.h"
 
 static SemaphoreHandle_t selectedChannelMutex = xSemaphoreCreateMutex();
 uint8_t selectedChannel;
 
-uint8_t uistate_getselectedchannel()
+uint8_t state_getselectedchannel()
 {
     return selectedChannel;
 }
 
-void uistate_setselectedchannel(uint8_t numChannel, ToggleModeEnum toggleMode)
+void state_setselectedchannel(uint8_t numChannel, ToggleModeEnum toggleMode)
 {   
     // Serial.print("Selecting new channel: ");
     // Serial.print(numChannel);

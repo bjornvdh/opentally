@@ -3,12 +3,13 @@
 #include "display/display_fonts.h"
 #include "display/display_draw_generic.h"
 #include "display/display_bootstatus.h"
+#include "display/display_onair.h"
 #include "sleep/sleep.h"
 
 #include <SPIFFS.h>
 #include <TFT_eSPI.h>
 
-#define DISPLAY_BLINK_INTERVAL 1000
+#define DISPLAY_BLINK_INTERVAL 500
 
 TFT_eSPI tft = TFT_eSPI(135, 240);
 
@@ -102,11 +103,14 @@ void display_task(void* parameters)
             tft.setCursor(10,55);
 
             display_draw_wifistatus();
+            display_onair();
 
             xSemaphoreTake(displayRefreshRequestMutex, portMAX_DELAY);
             displayRefreshIsRequested = false;
             clearScreenOnRefresh = false;
-            xSemaphoreGive(displayRefreshRequestMutex);            
+            xSemaphoreGive(displayRefreshRequestMutex);   
+
+            vTaskDelay(10);         
         }
 
         taskYIELD();
