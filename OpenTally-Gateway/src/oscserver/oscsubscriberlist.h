@@ -5,7 +5,8 @@
 
 enum class OSCDeviceType {
     TallyLight = 0,
-    OnAirDisplay = 1
+    OnAirDisplay = 1,
+    Gateway = 2,
 };
 
 struct OSCSubscriber {
@@ -16,7 +17,7 @@ struct OSCSubscriber {
 };
 
 void subscriber_addOrRefresh(IPAddress remoteIp, OSCDeviceType deviceType, uint8_t tallyChannel);
-void subscriber_task(void* parameters);
+
 
 
 #endif

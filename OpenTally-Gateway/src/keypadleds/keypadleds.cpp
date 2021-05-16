@@ -1,6 +1,6 @@
-#include "leds.h"
+#include "keypadleds.h"
 #include "keypad/keypad.h"
-#include "config/config_gateway.h"
+#include "config/config.h"
 #include "state/state_selectedchannel.h"
 #include "state/state_programpreview.h"
 #include "sleep/sleep.h"
@@ -8,7 +8,7 @@
 #include <FastLED.h>
 
 #define LEDS_SLOW_BLINK_INTERVAL 500
-#define LEDS_FAST_BLINK_INTERVAL 50
+#define LEDS_FAST_BLINK_INTERVAL 100
 
 #define NUM_LEDS 16
 #define LED_PIN 32
@@ -29,7 +29,6 @@ bool slowBlinkState = false;
 bool fastBlinkState = false;
 
 static SemaphoreHandle_t ledsRefreshRequestMutex;
-static portMUX_TYPE criticalMutex = portMUX_INITIALIZER_UNLOCKED;
 
 void updateBlink()
 {
@@ -38,14 +37,14 @@ void updateBlink()
     {
         lastSlowBlinkToggle = theTime;
         slowBlinkState = !slowBlinkState;
-        leds_request_refresh();
+        keypadleds_request_refresh();
     }
 
     if((theTime - lastFastBlinkToggle) > LEDS_FAST_BLINK_INTERVAL)
     {
         lastFastBlinkToggle = theTime;
         fastBlinkState = !fastBlinkState;
-        leds_request_refresh();
+        keypadleds_request_refresh();
     }    
 }
 
@@ -96,7 +95,7 @@ inline void refreshOverrideKeypad(int numLed)
     }
 }
 
-void leds_request_refresh()
+void keypadleds_request_refresh()
 {
     if(!ledsRefreshIsRequested)
     {
@@ -106,7 +105,7 @@ void leds_request_refresh()
     }
 }
 
-void leds_setup()
+void keypadleds_setup()
 {
     ledsRefreshRequestMutex = xSemaphoreCreateMutex();
 
@@ -115,7 +114,7 @@ void leds_setup()
     FastLED.show();    
 }
 
-void leds_task(void* parameters)
+void keypadleds_task(void* parameters)
 {
     while(true)
     {
@@ -140,19 +139,18 @@ void leds_task(void* parameters)
                 refreshOverrideKeypad(numLed);
             }
 
-            //vTaskEnterCritical(&criticalMutex);
             FastLED.show();
-            //vTaskExitCritical(&criticalMutex);
 
             xSemaphoreTake(ledsRefreshRequestMutex, portMAX_DELAY);
             ledsRefreshIsRequested = false;
             xSemaphoreGive(ledsRefreshRequestMutex);
 
+            // Wait a bit longer if we just refreshed.
             vTaskDelay(25);      
         }
-
-        // Once per 10ms is more than enough
+        // Update every 10ms is more than enough
         vTaskDelay(10);
+
     }
 }
 

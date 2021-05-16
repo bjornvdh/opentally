@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "buildconfig.h"
 #include "keypad/keypad.h"
 #include "keypadeventhandler/keypadeventdef.h"
 #include "display/display_bootstatus.h"
@@ -36,17 +37,20 @@ QueueHandle_t keypadEventQueue;
 void keypad_setup()
 {
     display_bootstep("Starting keypad...");
-    pinMode(GPIO_SENSE_COL1, INPUT);
-    pinMode(GPIO_SENSE_COL2, INPUT);
-    pinMode(GPIO_SENSE_COL3, INPUT);
-    pinMode(GPIO_SENSE_COL4, INPUT);
+    #ifdef HAS_KEYPAD_16KEYS
+        pinMode(GPIO_SENSE_COL1, INPUT);
+        pinMode(GPIO_SENSE_COL2, INPUT);
+        pinMode(GPIO_SENSE_COL3, INPUT);
+        pinMode(GPIO_SENSE_COL4, INPUT);
+
+        pinMode(GPIO_FEED_ROW1, OUTPUT);
+        pinMode(GPIO_FEED_ROW2, OUTPUT);
+        pinMode(GPIO_FEED_ROW3, OUTPUT);
+        pinMode(GPIO_FEED_ROW4, OUTPUT);
+    #endif
 
     pinMode(KEYPAD_HWBUTTON1, INPUT);
 
-    pinMode(GPIO_FEED_ROW1, OUTPUT);
-    pinMode(GPIO_FEED_ROW2, OUTPUT);
-    pinMode(GPIO_FEED_ROW3, OUTPUT);
-    pinMode(GPIO_FEED_ROW4, OUTPUT);
 
     keypadEventQueue = xQueueCreate(KEYPAD_QUEUE_LEN, sizeof(KeypadEventDef));
     display_bootstepresult(true);
@@ -97,24 +101,25 @@ void keypad_task(void* parameters)
         }
 
         uint32_t theTime = millis();
-        // Scan the keypad row by row
-        for(uint8_t numRow = 0; numRow < KEYPAD_NUM_ROWS; numRow++)
-        {
-            digitalWrite(_feed_rows[numRow], HIGH);
-
-            // And read all columns
-            for(uint8_t numCol = 0; numCol < KEYPAD_NUM_COLS; numCol++)
+        #ifdef HAS_KEYPAD_16KEYS
+            // Scan the keypad row by row
+            for(uint8_t numRow = 0; numRow < KEYPAD_NUM_ROWS; numRow++)
             {
-                uint8_t numKey = (numCol) + (numRow * 4);
-                if(keyHoldOff[numKey] < theTime) // Key is not being debounced
-                {
-                    bool keyIsPressed = (digitalRead(_sense_cols[numCol]) == 1);
-                    handleKeystate(theTime, numKey, keyIsPressed);
-                }
-            }
-            digitalWrite(_feed_rows[numRow], LOW);
-        }
+                digitalWrite(_feed_rows[numRow], HIGH);
 
+                // And read all columns
+                for(uint8_t numCol = 0; numCol < KEYPAD_NUM_COLS; numCol++)
+                {
+                    uint8_t numKey = (numCol) + (numRow * 4);
+                    if(keyHoldOff[numKey] < theTime) // Key is not being debounced
+                    {
+                        bool keyIsPressed = (digitalRead(_sense_cols[numCol]) == 1);
+                        handleKeystate(theTime, numKey, keyIsPressed);
+                    }
+                }
+                digitalWrite(_feed_rows[numRow], LOW);
+            }
+        #endif
         // Scan the two physical buttons on the UC itself
         if(keyHoldOff[16] < theTime) // Key is not being debounced
         {

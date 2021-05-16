@@ -8,7 +8,7 @@
 static SemaphoreHandle_t subscriberMutex = xSemaphoreCreateMutex();
 OSCSubscriber _subscribers[OSC_MAX_SUBSCRIBER_COUNT];
 
-void subsciber_addOrRefresh(IPAddress remoteIp, OSCDeviceType deviceType, uint8_t tallyChannel)
+void subscriber_addOrRefresh(IPAddress remoteIp, OSCDeviceType deviceType, uint8_t tallyChannel)
 {
     uint8_t iOpenSlot = OSC_MAX_SUBSCRIBER_COUNT + 1;
     uint8_t iSubscriberSlot = OSC_MAX_SUBSCRIBER_COUNT + 1;

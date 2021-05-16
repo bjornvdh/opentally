@@ -23,12 +23,12 @@ void handleSubscribe(OSCMessage &msg)
 
     Serial.print("OpenTally::Received subscribe from: ");
     Serial.print(_server_udp.remoteIP().toString());
-    Serial.print(" for channel: ");
+    Serial.print(" devtype: ");
     Serial.println(msg.getInt(0));
-
+    Serial.print(" for channel: ");
+    Serial.println(msg.getInt(1));
     
-
-    
+    subscriber_addOrRefresh(_server_udp.remoteIP(), (OSCDeviceType)msg.getInt(0), msg.getInt(1));
 }
 
 void initOscServer()

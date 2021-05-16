@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "config/config_gateway.h"
+#include "config/config.h"
 #include "state/state_selectedchannel.h"
 
 static SemaphoreHandle_t selectedChannelMutex = xSemaphoreCreateMutex();

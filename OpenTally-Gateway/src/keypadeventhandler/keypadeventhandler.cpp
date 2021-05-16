@@ -1,8 +1,8 @@
 #include "keypadeventhandler/keypadeventhandler.h"
 #include "keypadeventhandler/keypadeventdef.h"
 #include "keypad/keypad.h"
-#include "leds/leds.h"
-#include "config/config_gateway.h"
+#include "keypadleds/keypadleds.h"
+#include "config/config.h"
 #include "state/state_selectedchannel.h"
 #include "state/state_programpreview.h"
 #include "state/state_onair.h"
@@ -100,7 +100,7 @@ void keypadeventhandler_task(void* parameters)
 
         xQueueReceive(keypadEventQueue, (void*)&keypadEvent, portMAX_DELAY);
 
-        leds_request_refresh();
+        keypadleds_request_refresh();
         
         Serial.print("Key ");
         Serial.print(keypadEvent.numKey);

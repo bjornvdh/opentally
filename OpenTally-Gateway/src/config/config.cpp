@@ -2,7 +2,7 @@
 #include <ArduinoJSON.h>
 #include <SPIFFS.h>
 #include "display/display_bootstatus.h"
-#include "config/config_gateway.h"
+#include "config/config.h"
 #include "config/config_enums.h"
 #include "config/config_structs.h"
 
