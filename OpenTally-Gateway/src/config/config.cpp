@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <ArduinoJSON.h>
+#include <FS.h>
 #include <SPIFFS.h>
+#include "buildconfig.h"
 #include "display/display_bootstatus.h"
 #include "config/config.h"
 #include "config/config_enums.h"

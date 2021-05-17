@@ -7,6 +7,7 @@
 #include "state/state_programpreview.h"
 #include "state/state_onair.h"
 #include "sleep/sleep.h"
+#include "state/state_client_channel.h"
 
 extern QueueHandle_t keypadEventQueue;
 
@@ -45,6 +46,8 @@ void process_keyaction(KeypadEventDef keypadEvent, ConfigAction actionCfg)
     uint8_t numChannel;
     bool currentState;
     bool newState;    
+    Serial.print("[Keypad]::Keyaction: ");
+    Serial.println((int)actionCfg.Action);
     switch(actionCfg.Action)
     {
         case KeyAction::NoAction:
@@ -73,7 +76,16 @@ void process_keyaction(KeypadEventDef keypadEvent, ConfigAction actionCfg)
                 if(newState != currentState)state_setchannelprogramstate(numChannel, newState);
             }
             break;
+        case KeyAction::SetClientChannel:
+            Serial.println("[Keypad]::Set client channel.");
+            if(actionCfg.Param2 == "0")   //  0=Cycle, 1=Set value
+                state_cycleclientchannel();
+            else
+                state_setclientchannel(actionCfg.Param1);
+
+            break;
         case KeyAction::SetOnAirState:
+        {
             int newState = actionCfg.Param1;
             if(newState > 2)
             {
@@ -83,7 +95,8 @@ void process_keyaction(KeypadEventDef keypadEvent, ConfigAction actionCfg)
             }
             
             onair_setstate((OnAirState) newState);
-            break;            
+            break;
+        }
     }
 }
 
@@ -102,7 +115,7 @@ void keypadeventhandler_task(void* parameters)
 
         keypadleds_request_refresh();
         
-        Serial.print("Key ");
+        Serial.print("[Keypad::]Key ");
         Serial.print(keypadEvent.numKey);
         KeyConfig cfg;
         switch(keypadEvent.eventType)

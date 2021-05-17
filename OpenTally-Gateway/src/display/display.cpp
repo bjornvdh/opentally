@@ -6,6 +6,7 @@
 #include "display/display_onair.h"
 #include "sleep/sleep.h"
 
+#include <FS.h>
 #include <SPIFFS.h>
 #include <TFT_eSPI.h>
 
@@ -40,18 +41,18 @@ void display_setup()
     tft.setRotation(1);
 
     tft.fillScreen(TFT_BLACK);
-    display_bootstep("Starting SPIFFS...");
+    display_bootstep("Starting FS...");
 
     if (!SPIFFS.begin()) {
         display_bootstepresult(false);       
-        Serial.println("SPIFFS initialisation failed!");
+        Serial.println("FS initialisation failed!");
         while (1) yield(); // Stay here twiddling thumbs waiting
     }
     else
     {
         display_bootstepresult(true);
     }
-    Serial.println("\r\nSPIFFS available!");
+    Serial.println("\r\nFS available!");
 
     display_bootstep("Detecting fonts...");
     // ESP32 will crash if any of the fonts are missing

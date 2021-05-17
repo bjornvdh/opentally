@@ -29,5 +29,3 @@
     #define OPENTALLY_DEVICE_TYPE 0
     #define IS_OSCCLIENT
 #endif
-
-

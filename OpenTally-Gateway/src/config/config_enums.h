@@ -43,6 +43,10 @@ enum class KeyAction
                                     //      P1: Mode - 0 (off air), 1 (count down), 2 (on air), 3 (cycle between off air, count down, on air)
 
     DeepSleep = 7,                  // Turn off the device.
+
+    SetClientChannel = 8,           // Set the client channel.
+                                    //      P1: Channel number (not used when cycling).
+                                    //      P2: Mode - 0 (cycle), 1 (set value)
 };
 
 #endif

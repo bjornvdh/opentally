@@ -4,6 +4,7 @@
 
 #include <buildconfig.h>
 
+#include "state/state_client_channel.h"
 #include "keypad/keypad.h"
 #include "keypadeventhandler/keypadeventhandler.h"
 #include "keypadleds/keypadleds.h"
@@ -24,10 +25,12 @@ void setup() {
   keypadeventhandler_setup();
   keypadleds_setup();
   net_setup();
+  state_clientchannel_setup();
 
+  
   xTaskCreatePinnedToCore(display_task, "DISP", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(keypad_task, "KEYPAD", 2048, NULL, 1, NULL, 1);  
-  xTaskCreatePinnedToCore(keypadeventhandler_task, "KEYPADEVENTS", 2048, NULL, 1, NULL, 1);  
+  xTaskCreatePinnedToCore(keypadeventhandler_task, "KEYPADEVENTS", 4096, NULL, 1, NULL, 1);  
   
   #ifdef HAS_KEYPAD_LEDS
     xTaskCreatePinnedToCore(keypadleds_task, "LEDS", 2048, NULL, 1, NULL, 1);  

@@ -25,7 +25,16 @@ void initOscClient()
 
 void sendSubscribe()
 {
-
+    // OSCMessage msg("/subscribe/tally");
+    // msg.add(TallyStatus.NumCamera);
+    // _client_udp.beginPacket(_osc_server_ip, 13323);
+    // msg.send(_client_udp);
+    // _client_udp.endPacket();
+    // msg.empty();
+    
+    // _last_subscribe = millis();
+    // Serial.println("EZTALLY::Subscribe sent.");
+    // _my_tally_channel = TallyStatus.NumCamera;
 }
 
 void oscclient_task(void* parameters)
