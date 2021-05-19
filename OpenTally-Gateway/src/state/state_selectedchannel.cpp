@@ -2,6 +2,7 @@
 #include "config/config.h"
 #include "state/state_selectedchannel.h"
 
+
 static SemaphoreHandle_t selectedChannelMutex = xSemaphoreCreateMutex();
 uint8_t selectedChannel;
 

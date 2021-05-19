@@ -4,6 +4,11 @@
 
 #include "state_client_channel.h"
 #include "buildconfig.h"
+#include "display/display.h"
+
+#ifdef IS_OSCCLIENT
+    #include "oscclient/oscclient.h"
+#endif
 
 static SemaphoreHandle_t clientChannelMutex = xSemaphoreCreateMutex();
 
@@ -20,13 +25,9 @@ void writeClientChannel()
     File clientChannelFile = SPIFFS.open("/clientchannel.cfg", "w");
     if(clientChannelFile)
     {
-        //Serial.println("[Client channel]::File opened.");
         clientChannelFile.write((byte*) &clientChannelConfig, sizeof(clientChannelConfig));
-        //Serial.println("[Client channel]::File written.");
         clientChannelFile.flush();
-        //Serial.println("[Client channel]::File flushed.");
         clientChannelFile.close();
-        //Serial.println("[Client channel]::File closed.");
         Serial.print("[Client channel]::");
         Serial.print(clientChannelConfig.channel);
         Serial.println(" written to flash.");
@@ -35,6 +36,10 @@ void writeClientChannel()
     {
         Serial.println("[Client channel]::Fopen failed!");
     }
+
+    #ifdef IS_OSCCLIENT
+        oscclient_request_resubscribe();
+    #endif
 }
 
 void readClientChannel()
@@ -68,6 +73,7 @@ void state_setclientchannel(int numChannel)
     clientChannelConfig.channel = numChannel;
     xSemaphoreGive(clientChannelMutex);  
     writeClientChannel();
+    display_request_refresh(false);
 }
 
 int state_getclientchannel()
@@ -83,6 +89,7 @@ int state_cycleclientchannel()
         clientChannelConfig.channel = 1;
     xSemaphoreGive(clientChannelMutex);  
     writeClientChannel();
+    display_request_refresh(false);
 
     return clientChannelConfig.channel;
 }

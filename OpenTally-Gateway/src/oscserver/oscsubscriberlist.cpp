@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "messagebuffer/messagebuffer.h"
 #include "oscserver/oscsubscriberlist.h"
 
 #define OSC_MAX_SUBSCRIBER_COUNT 64
@@ -49,5 +50,62 @@ void subscriber_addOrRefresh(IPAddress remoteIp, OSCDeviceType deviceType, uint8
     {
         Serial.println("No open slot.");
     }  
+    xSemaphoreGive(subscriberMutex);
+}
+
+void subscriber_queuemessageforall(MessageStruct msgTemplate)
+{
+    uint32_t time = millis();
+    xSemaphoreTake(subscriberMutex, portMAX_DELAY);
+    for(uint8_t i = 0; i < OSC_MAX_SUBSCRIBER_COUNT; i++)
+    {    
+        if(_subscribers[i].ValidUntil >= time)
+        {
+            MessageStruct msg;
+            msg.Address = msgTemplate.Address;
+            msg.P1 = msgTemplate.P1;
+            msg.P2 = msgTemplate.P2;
+            msg.Recipient = _subscribers[i].RemoteIP;
+            messagebuffer_queuemessage(msg);
+        }
+    }
+    xSemaphoreGive(subscriberMutex);
+}
+
+void subscriber_queuemessageforchannel(MessageStruct msgTemplate, int channel)
+{
+    uint32_t time = millis();
+    xSemaphoreTake(subscriberMutex, portMAX_DELAY);
+    for(uint8_t i = 0; i < OSC_MAX_SUBSCRIBER_COUNT; i++)
+    {    
+        if(_subscribers[i].ValidUntil >= time && _subscribers[i].TallyChannel == channel)
+        {
+            MessageStruct msg;
+            msg.Address = msgTemplate.Address;
+            msg.P1 = msgTemplate.P1;
+            msg.P2 = msgTemplate.P2;
+            msg.Recipient = _subscribers[i].RemoteIP;
+            messagebuffer_queuemessage(msg);
+        }
+    }
+    xSemaphoreGive(subscriberMutex);
+}
+
+void subscriber_queuemessagefordevicetype(MessageStruct msgTemplate, OSCDeviceType deviceType)
+{
+    uint32_t time = millis();
+    xSemaphoreTake(subscriberMutex, portMAX_DELAY);
+    for(uint8_t i = 0; i < OSC_MAX_SUBSCRIBER_COUNT; i++)
+    {    
+        if(_subscribers[i].ValidUntil >= time && _subscribers[i].DeviceType == deviceType)
+        {
+            MessageStruct msg;
+            msg.Address = msgTemplate.Address;
+            msg.P1 = msgTemplate.P1;
+            msg.P2 = msgTemplate.P2;
+            msg.Recipient = _subscribers[i].RemoteIP;
+            messagebuffer_queuemessage(msg);
+        }
+    }
     xSemaphoreGive(subscriberMutex);
 }

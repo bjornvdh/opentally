@@ -14,5 +14,6 @@ enum class OSCDispatchMessageType
 
 extern QueueHandle_t oscOutgoingMessageQueue;
 void oscdispatch_onairstate(OnAirState onAirState, int countDown);
+void oscdispatch_tallystate(int tallyChannel, bool preview, bool program);
 
 #endif

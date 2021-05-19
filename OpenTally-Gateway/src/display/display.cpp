@@ -1,16 +1,20 @@
 #include <Arduino.h>
+#include "buildconfig.h"
+#include "config/config_enums.h"
 #include "display/display.h"
 #include "display/display_fonts.h"
 #include "display/display_draw_generic.h"
 #include "display/display_bootstatus.h"
 #include "display/display_onair.h"
+#include "display/display_tallystatus.h"
+#include "display/display_gatewaystate.h"
 #include "sleep/sleep.h"
 
 #include <FS.h>
 #include <SPIFFS.h>
 #include <TFT_eSPI.h>
 
-#define DISPLAY_BLINK_INTERVAL 500
+#define DISPLAY_BLINK_INTERVAL 1000
 
 TFT_eSPI tft = TFT_eSPI(135, 240);
 
@@ -99,6 +103,12 @@ void display_task(void* parameters)
         {
             if(clearScreenOnRefresh) tft.fillScreen(TFT_BLACK);
 
+            if(OPENTALLY_DEVICE_TYPE == (int)OSCDeviceType::TallyLight)
+            {
+                display_tallystatus();
+                display_gatewaystate();
+            }
+
             tft.setTextColor(TFT_YELLOW, TFT_BLACK);
             tft.setTextColor(TFT_WHITE, TFT_BLACK);
             tft.setCursor(10,55);
@@ -109,11 +119,9 @@ void display_task(void* parameters)
             xSemaphoreTake(displayRefreshRequestMutex, portMAX_DELAY);
             displayRefreshIsRequested = false;
             clearScreenOnRefresh = false;
-            xSemaphoreGive(displayRefreshRequestMutex);   
-
-            vTaskDelay(10);         
+            xSemaphoreGive(displayRefreshRequestMutex);           
         }
 
-        taskYIELD();
+        vTaskDelay(2);
     }
 }

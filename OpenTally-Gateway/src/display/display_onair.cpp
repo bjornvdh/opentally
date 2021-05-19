@@ -28,6 +28,7 @@ void display_state_offair()
     tft.setTextDatum(TL_DATUM);
     tft.print("LIVE");
     tft.unloadFont();
+    tft.drawLine(2,2,35,15,TFT_DARKGREY);
 }
 
 void display_state_countdown()
@@ -35,13 +36,7 @@ void display_state_countdown()
     int count = onair_getcount();
     if(previousCountValue != count)
     {
-        tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-        tft.loadFont(AA_FONT_SMALL);    
-        tft.fillRect(0,0,50,15,TFT_BLACK);
-        tft.setCursor(15,2);
-        tft.setTextDatum(TL_DATUM);
-        tft.print(count);
-        tft.unloadFont();
+
         previousCountValue = count;
     }
 }
@@ -49,20 +44,29 @@ void display_state_countdown()
 void display_onair()
 {
     OnAirState newState = onair_getstate();
-    if(newState != previousOnAirState) tft.fillRect(0,0,50,15,TFT_BLACK);
-
-    switch(newState)
+    int count = onair_getcount();
+    if(newState != previousOnAirState || count != previousCountValue) 
     {
-        case OnAirState::OffAir:
-            if(newState != previousOnAirState) display_state_offair();
-            break;
-        case OnAirState::OnAir:
-            if(newState != previousOnAirState) display_state_onair();
-            break;
-        case OnAirState::Countdown:
-            display_state_countdown();
-            break;
-    }
+        tft.fillRect(0,0,50,18,TFT_BLACK);
 
+        switch(newState)
+        {
+            case OnAirState::OffAir:
+                if(newState != previousOnAirState) display_state_offair();
+                break;
+            case OnAirState::OnAir:
+                if(newState != previousOnAirState) display_state_onair();
+                break;
+            case OnAirState::Countdown:
+                tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+                tft.loadFont(AA_FONT_SMALL);    
+                tft.setCursor(15,2);
+                tft.setTextDatum(TL_DATUM);
+                tft.print(count);
+                tft.unloadFont();
+                break;
+        }
+    }
+    previousCountValue = count;
     previousOnAirState = newState;
 }

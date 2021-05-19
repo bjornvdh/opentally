@@ -1,6 +1,12 @@
 #ifndef __CONFIG_ENUMS_H
 #define __CONFIG_ENUMS_H
 
+enum class OSCDeviceType {
+    TallyLight = 0,
+    OnAirDisplay = 1,
+    Gateway = 2,
+};
+
 enum class ToggleModeEnum
 {
     SetOff = 0,

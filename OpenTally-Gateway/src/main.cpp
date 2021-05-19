@@ -12,8 +12,10 @@
 #include "display/display.h"
 #include "config/config.h"
 #include "state/state_onair.h"
+#include "state/state_programpreview.h"
 #include "oscserver/oscserver.h"
 #include "oscclient/oscclient.h"
+#include "oscsender/oscsender.h"
 
 void setup() {
   Serial.begin(115200);
@@ -39,7 +41,9 @@ void setup() {
   xTaskCreatePinnedToCore(net_task, "NET", 4096, NULL, 1, NULL, 1);
 
   #ifdef IS_ONAIR_CONTROLLER
-    xTaskCreatePinnedToCore(onair_task, "ONAIR", 1024, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(onair_task, "ONAIR", 8192, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(onair_refresh_task, "ONAIR_REFRESH", 4096, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(tallystate_refresh_task, "TALLY_REFRESH", 4096, NULL, 1, NULL, 1);
   #endif
 
   #ifdef IS_OSCSERVER
@@ -48,7 +52,10 @@ void setup() {
 
   #ifdef IS_OSCCLIENT
     xTaskCreatePinnedToCore(oscclient_task, "OSCCLIENT_PACKET", 4096, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(oscclient_server_resolver_task, "OSCCLIENT_RESOLVER", 4096, NULL, 1, NULL, 1);
   #endif
+
+  xTaskCreatePinnedToCore(oscsender_task, "OSCSENDER", 8192, NULL, 1, NULL, 1);
 }
 
 void loop() {

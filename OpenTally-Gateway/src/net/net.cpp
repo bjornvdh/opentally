@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "buildconfig.h"
 #include "net/net.h"
 #include "display/display.h"
 #include "display/display_bootstatus.h"
@@ -9,6 +10,7 @@
 #include <ArduinoOTA.h>
 #include <Wifi.h>
 #include <WifiManager.h>
+#include <ESPmDNS.h>
 
 #define RSSI_POLL_INTERVAL 2500
 
@@ -19,6 +21,26 @@ bool configApIsActive = false;
 bool wifiIsConntected = false;
 uint8_t wifiRSSI = 0;
 
+String _hostname;
+String _titleAndApname;
+
+String net_getMacAddress() {
+    uint8_t baseMac[6];
+    // Get MAC address for WiFi station
+    esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+    char baseMacChr[18] = {0};
+    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+    return String(baseMacChr);
+}
+
+String net_getMacAddressShort() {
+    uint8_t baseMac[6];
+    // Get MAC address for WiFi station
+    esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+    char baseMacChr[13] = {0};
+    sprintf(baseMacChr, "%02X%02X%02X%02X%02X%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+    return String(baseMacChr);
+}
 
 uint8_t net_getWifiRSSI()
 {
@@ -42,12 +64,24 @@ void net_setup()
     WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP    
     
     wm.setShowInfoErase(false);
-    wm.setHostname("OpenTallyGW");
+
+    _hostname = HOSTNAME_PREFIX;
+    _titleAndApname = CONFIG_TITLE;
+    if(APPEND_CHIPID_TO_HOSTNAME)
+    {
+        String macShort = net_getMacAddressShort();
+        _hostname = HOSTNAME_PREFIX + macShort;
+        _titleAndApname = CONFIG_TITLE + macShort;
+    }
+
+    const char *hostnameChar = _hostname.c_str();
+    const char *titleChar = _titleAndApname.c_str();
+    wm.setHostname(hostnameChar);
     wm.setConfigPortalBlocking(false);
     wm.setWiFiAutoReconnect(true);
-    wm.setTitle("OpenTally Gateway");
+    wm.setTitle(_titleAndApname);
 
-    if(wm.autoConnect("OpenTally Gateway")){
+    if(wm.autoConnect(titleChar)){
         Serial.println("connected...yay :)");
     }
     else {
@@ -55,6 +89,23 @@ void net_setup()
     } 
 
     display_bootstepresult(true);
+    display_bootstep("Starting mDNS...");
+    if(!MDNS.begin(hostnameChar)) {
+        
+        Serial.println("Error starting mDNS");
+        display_bootstepresult(false);
+        while(true) {}
+    }
+    else
+    {
+        MDNS.addService("http", "tcp", 80);
+        #ifdef IS_OSCSERVER
+            MDNS.addService("opentally", "udp", OPENTALLY_UDP_PORT);
+        #endif
+    }
+
+    display_bootstepresult(true);
+
 }
 
 void net_task(void* parameters)
@@ -107,6 +158,6 @@ void net_task(void* parameters)
         }
 
         // Now go do something else first
-        taskYIELD();
+        vTaskDelay(1);
     }
 }
