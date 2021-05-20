@@ -4,5 +4,9 @@
 			"path": "OpenTally-Gateway"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"system_error": "cpp"
+		}
+	}
 }

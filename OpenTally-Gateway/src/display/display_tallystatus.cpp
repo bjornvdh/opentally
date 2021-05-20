@@ -4,6 +4,7 @@
 #include "state/state_client_channel.h"
 #include "display/display_fonts.h"
 #include "display_tallystatus.h"
+#include "display/display_messages.h"
 
 extern TFT_eSPI tft;
 extern bool displayBlinkState;
@@ -17,6 +18,7 @@ void display_tallystatus()
     int numChannel = state_getclientchannel();
     bool preview = state_getchannelpreviewstate(numChannel);
     bool program = state_getchannelprogramstate(numChannel);
+    bool forceRefreshMessage = false;
 
     uint32_t bgcolor = TFT_NAVY;
     if(program)
@@ -38,11 +40,13 @@ void display_tallystatus()
 
     if(_last_preview_state != preview || _last_program_state != program || _last_channel_num != numChannel)
     {
-
         tft.fillRect(0, 20, tft.width(), tft.height() - 20, bgcolor);
         _last_program_state = program;
         _last_preview_state = preview;
+
+        forceRefreshMessage = true;
     }
+    display_mymessages(forceRefreshMessage, bgcolor);
 
     _last_channel_num = numChannel;
 }

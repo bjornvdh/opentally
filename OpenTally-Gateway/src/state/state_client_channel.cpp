@@ -5,6 +5,7 @@
 #include "state_client_channel.h"
 #include "buildconfig.h"
 #include "display/display.h"
+#include "tallyleds/tallyleds.h"
 
 #ifdef IS_OSCCLIENT
     #include "oscclient/oscclient.h"
@@ -74,6 +75,7 @@ void state_setclientchannel(int numChannel)
     xSemaphoreGive(clientChannelMutex);  
     writeClientChannel();
     display_request_refresh(false);
+    tallyleds_update();
 }
 
 int state_getclientchannel()
@@ -90,6 +92,7 @@ int state_cycleclientchannel()
     xSemaphoreGive(clientChannelMutex);  
     writeClientChannel();
     display_request_refresh(false);
+    tallyleds_update();
 
     return clientChannelConfig.channel;
 }

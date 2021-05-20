@@ -10,6 +10,7 @@ struct MessageStruct
     IPAddress Recipient;
     int P1;
     String P2;
+    String P3;
 };
 
 void messagebuffer_queuemessage(MessageStruct msg);

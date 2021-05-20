@@ -62,6 +62,7 @@ void display_setup()
     // ESP32 will crash if any of the fonts are missing
     bool font_missing = false;
     if (SPIFFS.exists("/NotoSansBold15.vlw")    == false) font_missing = true;
+    if (SPIFFS.exists("/NotoSansRegular20.vlw")    == false) font_missing = true;
     if (SPIFFS.exists("/NotoSansBold36.vlw")    == false) font_missing = true;
     if (SPIFFS.exists("/LeelawadeeUI-Bold-48.vlw")    == false) font_missing = true;
 

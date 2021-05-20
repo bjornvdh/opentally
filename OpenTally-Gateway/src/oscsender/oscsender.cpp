@@ -17,6 +17,7 @@ void oscsender_task(void* params)
             OSCMessage msg(msgDef.Address.c_str());
             msg.add(msgDef.P1);
             msg.add(msgDef.P2.c_str());
+            msg.add(msgDef.P3.c_str());
 
             Udp.beginPacket(msgDef.Recipient, OPENTALLY_UDP_PORT);
             msg.send(Udp); 

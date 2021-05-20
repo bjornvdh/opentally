@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include <OSCMessage.h>
+#include <buildconfig.h>
 #include "state/state_programpreview.h"
 #include "oscserver/oscdispatcher.h"
 #include "display/display.h"
+#include "tallyleds/tallyleds.h"
 
-bool _channelProgramState[32];
-bool _channelPreviewState[32];
+bool _channelProgramState[CHANNEL_COUNT];
+bool _channelPreviewState[CHANNEL_COUNT];
 
 static SemaphoreHandle_t programPreviewStateMutex = xSemaphoreCreateMutex();
 
@@ -25,7 +27,7 @@ void tallystate_refresh_task(void* parameters)
     while(true)
     {
         numChannel++;
-        if(numChannel > 31) numChannel = 0;
+        if(numChannel > (CHANNEL_COUNT - 1)) numChannel = 0;
         xSemaphoreTake(programPreviewStateMutex, portMAX_DELAY);
         bool previewState = _channelPreviewState[numChannel];
         bool programState = _channelProgramState[numChannel];
@@ -56,7 +58,11 @@ void state_receivetallystate(OSCMessage &msg)
     _channelProgramState[numChannel] = programState;
     xSemaphoreGive(programPreviewStateMutex);  
 
-    if(stateIsDifferent) display_request_refresh(false);    
+    if(stateIsDifferent) 
+    {
+        display_request_refresh(false);    
+        tallyleds_update();
+    }
 }
 
 void state_setchannelprogramstate(int numChannel, bool state)

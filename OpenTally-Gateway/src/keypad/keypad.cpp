@@ -18,9 +18,6 @@
 #define KEYPAD_NUM_ROWS 4
 #define KEYPAD_NUM_COLS 4
 
-#define KEYPAD_HWBUTTON1 35
-#define KEYPAD_HWBUTTON2 0
-
 #define DEBOUNCE_TIME 10 // mSec
 #define LONGPRESS_TIME 750 // mSec
 
@@ -123,13 +120,13 @@ void keypad_task(void* parameters)
         // Scan the two physical buttons on the UC itself
         if(keyHoldOff[16] < theTime) // Key is not being debounced
         {
-            bool keyIsPressed = !digitalRead(KEYPAD_HWBUTTON1); // Default high for HW buttons.
+            bool keyIsPressed = KEYPAD_HWBUTTONS_ACTIVE_HIGH ? digitalRead(KEYPAD_HWBUTTON1) : !digitalRead(KEYPAD_HWBUTTON1); 
             handleKeystate(theTime, 16, keyIsPressed);
         }
 
         if(keyHoldOff[17] < theTime) // Key is not being debounced
         {
-            bool keyIsPressed = !digitalRead(KEYPAD_HWBUTTON2); // Default high for HW buttons.
+            bool keyIsPressed = KEYPAD_HWBUTTONS_ACTIVE_HIGH ? digitalRead(KEYPAD_HWBUTTON2) : !digitalRead(KEYPAD_HWBUTTON2); 
             handleKeystate(theTime, 17, keyIsPressed);
         }
 

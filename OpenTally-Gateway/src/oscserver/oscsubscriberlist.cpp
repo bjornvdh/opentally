@@ -61,10 +61,7 @@ void subscriber_queuemessageforall(MessageStruct msgTemplate)
     {    
         if(_subscribers[i].ValidUntil >= time)
         {
-            MessageStruct msg;
-            msg.Address = msgTemplate.Address;
-            msg.P1 = msgTemplate.P1;
-            msg.P2 = msgTemplate.P2;
+            MessageStruct msg = msgTemplate;
             msg.Recipient = _subscribers[i].RemoteIP;
             messagebuffer_queuemessage(msg);
         }
@@ -80,10 +77,7 @@ void subscriber_queuemessageforchannel(MessageStruct msgTemplate, int channel)
     {    
         if(_subscribers[i].ValidUntil >= time && _subscribers[i].TallyChannel == channel)
         {
-            MessageStruct msg;
-            msg.Address = msgTemplate.Address;
-            msg.P1 = msgTemplate.P1;
-            msg.P2 = msgTemplate.P2;
+            MessageStruct msg = msgTemplate;
             msg.Recipient = _subscribers[i].RemoteIP;
             messagebuffer_queuemessage(msg);
         }
@@ -99,10 +93,7 @@ void subscriber_queuemessagefordevicetype(MessageStruct msgTemplate, OSCDeviceTy
     {    
         if(_subscribers[i].ValidUntil >= time && _subscribers[i].DeviceType == deviceType)
         {
-            MessageStruct msg;
-            msg.Address = msgTemplate.Address;
-            msg.P1 = msgTemplate.P1;
-            msg.P2 = msgTemplate.P2;
+            MessageStruct msg = msgTemplate;
             msg.Recipient = _subscribers[i].RemoteIP;
             messagebuffer_queuemessage(msg);
         }

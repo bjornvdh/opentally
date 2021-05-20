@@ -15,6 +15,7 @@
 #include "state/state_programpreview.h"
 #include "messagebuffer/messagebuffer.h"
 #include "display/display.h"
+#include "channelmessage/channelmessage.h"
 
 #define SUBSCRIBE_INTERVAL  20000
 
@@ -139,10 +140,11 @@ void oscclient_task(void* parameters)
                     msg.fill(_client_udp.read());
                 }
                 if (!msg.hasError()) {
-                    //Serial.println("OpenTally::Message received.");
+                    Serial.println("[OSCCLIENT]::Message received.");
                     //msg.dispatch("/subscribe/tally", handleSubscribe);
                     msg.dispatch("/state/onair", onair_receivestate);
                     msg.dispatch("/state/tally", state_receivetallystate);
+                    msg.dispatch("/state/msg", channelmessage_receive);
                 } else {
                     _client_error = msg.getError();
                     Serial.print("OpenTally::error: ");

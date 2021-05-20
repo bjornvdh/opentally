@@ -8,6 +8,7 @@
 #include "state/state_onair.h"
 #include "sleep/sleep.h"
 #include "state/state_client_channel.h"
+#include "channelmessage/channelmessage.h"
 
 extern QueueHandle_t keypadEventQueue;
 
@@ -84,6 +85,17 @@ void process_keyaction(KeypadEventDef keypadEvent, ConfigAction actionCfg)
                 state_setclientchannel(actionCfg.Param1);
 
             break;
+        case KeyAction::SendMessage:
+            Serial.println("[Keypad]::Send message.");
+            numChannel = state_getselectedchannel();
+            if(actionCfg.Param1 != 0)
+                numChannel = actionCfg.Param1;
+            
+            if(numChannel != 0)
+            {
+                channelmessage_set(numChannel, actionCfg.Param2, 10000);
+            }
+            break;
         case KeyAction::SetOnAirState:
         {
             int newState = actionCfg.Param1;
@@ -113,7 +125,9 @@ void keypadeventhandler_task(void* parameters)
 
         xQueueReceive(keypadEventQueue, (void*)&keypadEvent, portMAX_DELAY);
 
+        #ifdef HAS_KEYPAD_LEDS
         keypadleds_request_refresh();
+        #endif
         
         Serial.print("[Keypad::]Key ");
         Serial.print(keypadEvent.numKey);

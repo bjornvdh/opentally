@@ -16,6 +16,8 @@
 #include "oscserver/oscserver.h"
 #include "oscclient/oscclient.h"
 #include "oscsender/oscsender.h"
+#include "channelmessage/channelmessage.h"
+#include "tallyleds/tallyleds.h"
 
 void setup() {
   Serial.begin(115200);
@@ -25,13 +27,20 @@ void setup() {
   config_gateway_setup();
   keypad_setup();
   keypadeventhandler_setup();
-  keypadleds_setup();
+  #ifdef HAS_KEYPAD_LEDS
+    keypadleds_setup();
+  #endif
+
+  #ifdef HAS_TALLY_LEDS
+    tallyleds_setup();
+  #endif
+
   net_setup();
   state_clientchannel_setup();
 
   
   xTaskCreatePinnedToCore(display_task, "DISP", 4096, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(keypad_task, "KEYPAD", 2048, NULL, 1, NULL, 1);  
+  xTaskCreatePinnedToCore(keypad_task, "KEYPAD", 4096, NULL, 1, NULL, 1);  
   xTaskCreatePinnedToCore(keypadeventhandler_task, "KEYPADEVENTS", 4096, NULL, 1, NULL, 1);  
   
   #ifdef HAS_KEYPAD_LEDS
@@ -56,6 +65,7 @@ void setup() {
   #endif
 
   xTaskCreatePinnedToCore(oscsender_task, "OSCSENDER", 8192, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(channelmessage_task, "CHANNELMESSAGE", 4096, NULL, 1, NULL, 1);
 }
 
 void loop() {

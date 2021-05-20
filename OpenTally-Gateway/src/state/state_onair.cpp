@@ -3,6 +3,7 @@
 #include "state/state_onair.h"
 #include "display/display.h"
 #include "oscserver/oscdispatcher.h"
+#include "tallyleds/tallyleds.h"
 
 static SemaphoreHandle_t onAirStateMutex = xSemaphoreCreateMutex();
 uint8_t _countdown_count = 0;
@@ -20,6 +21,7 @@ void onair_task(void* parameters)
             _countdown_count--;
             xSemaphoreGive(onAirStateMutex);
             display_request_refresh(false);
+            tallyleds_update();
             
             if(_countdown_count == 0)
             {
@@ -69,7 +71,11 @@ void onair_receivestate(OSCMessage &msg)
     _countdown_count = newCountDownCount;
     xSemaphoreGive(onAirStateMutex);    
 
-    if(stateIsDifferent) display_request_refresh(false);
+    if(stateIsDifferent) 
+    {
+        display_request_refresh(false);
+        tallyleds_update();
+    }
 }
 
 void onair_setstate(OnAirState newState)
@@ -82,6 +88,7 @@ void onair_setstate(OnAirState newState)
     xSemaphoreGive(onAirStateMutex);
 
     display_request_refresh(false);
+    tallyleds_update();
 }
 
 OnAirState onair_getstate()
