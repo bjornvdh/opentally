@@ -38,3 +38,19 @@ void oscdispatch_channelmessage(int tallyChannel, String message, uint32_t timeL
 
     subscriber_queuemessageforchannel(msg, tallyChannel);    
 }
+
+void oscdispatch_channelsound(int tallyChannel, uint32_t sound, uint32_t timeLeft)
+{
+    Serial.print("[OSCDISP]::Dispatching channel sound for channel ");
+    Serial.print(tallyChannel);
+    Serial.print(" time ");
+    Serial.print(String(timeLeft));
+    Serial.println(".");
+    MessageStruct msg;
+    msg.Address = "/state/sound";
+    msg.P1 = tallyChannel;
+    msg.P2 = String(sound);
+    msg.P3 = String(timeLeft);
+
+    subscriber_queuemessageforchannel(msg, tallyChannel);    
+}

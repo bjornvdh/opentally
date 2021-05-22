@@ -11,23 +11,25 @@ int previousCountValue = 0;
 void display_state_onair()
 {
     tft.setTextColor(TFT_RED, TFT_BLACK);
-    tft.loadFont(AA_FONT_SMALL);    
+    //tft.loadFont(AA_FONT_SMALL);    
+    tft.setTextFont(2);
     //tft.fillRect(0,0,100,10,TFT_BLACK);
-    tft.setCursor(2,2);
+    tft.setCursor(4,2);
     tft.setTextDatum(TL_DATUM);
     tft.print("LIVE");
-    tft.unloadFont();
+    //tft.unloadFont();
 }
 
 void display_state_offair()
 {
     tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
-    tft.loadFont(AA_FONT_SMALL);    
+    //tft.loadFont(AA_FONT_SMALL);    
+    tft.setTextFont(2);
     //tft.fillRect(0,0,100,10,TFT_BLACK);
-    tft.setCursor(2,2);
+    tft.setCursor(4,2);
     tft.setTextDatum(TL_DATUM);
     tft.print("LIVE");
-    tft.unloadFont();
+    //tft.unloadFont();
     tft.drawLine(2,2,35,15,TFT_DARKGREY);
 }
 
@@ -59,11 +61,12 @@ void display_onair()
                 break;
             case OnAirState::Countdown:
                 tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-                tft.loadFont(AA_FONT_SMALL);    
+                //tft.loadFont(AA_FONT_SMALL);    
+                tft.setTextFont(2);
                 tft.setCursor(15,2);
                 tft.setTextDatum(TL_DATUM);
                 tft.print(count);
-                tft.unloadFont();
+                //tft.unloadFont();
                 break;
         }
     }

@@ -28,14 +28,15 @@ void display_tallystatus()
 
     if(_last_channel_num != numChannel)
     {
-        tft.loadFont(AA_FONT_SMALL);        
+        //tft.loadFont(AA_FONT_SMALL);        
+        tft.setTextFont(2);
         tft.setTextDatum(MC_DATUM);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         String numCameraString = String(numChannel);
         tft.fillRect(70,0,20,20, TFT_BLACK);
         tft.setCursor(80,2);
         tft.println(numCameraString);
-        tft.unloadFont();
+        //tft.unloadFont();
     }
 
     if(_last_preview_state != preview || _last_program_state != program || _last_channel_num != numChannel)

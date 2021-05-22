@@ -8,6 +8,7 @@
 #include "display/display_onair.h"
 #include "display/display_tallystatus.h"
 #include "display/display_gatewaystate.h"
+#include "display/display_messages.h"
 #include "sleep/sleep.h"
 
 #include <FS.h>
@@ -116,6 +117,11 @@ void display_task(void* parameters)
 
             display_draw_wifistatus();
             display_onair();
+
+            if(OPENTALLY_DEVICE_TYPE == (int)OSCDeviceType::Gateway)
+            {
+                display_allmessages();
+            }
 
             xSemaphoreTake(displayRefreshRequestMutex, portMAX_DELAY);
             displayRefreshIsRequested = false;

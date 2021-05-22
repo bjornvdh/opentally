@@ -17,6 +17,7 @@
 #include "oscclient/oscclient.h"
 #include "oscsender/oscsender.h"
 #include "channelmessage/channelmessage.h"
+#include "channelmessage/channelsound.h"
 #include "tallyleds/tallyleds.h"
 
 void setup() {
@@ -46,6 +47,10 @@ void setup() {
   #ifdef HAS_KEYPAD_LEDS
     xTaskCreatePinnedToCore(keypadleds_task, "LEDS", 2048, NULL, 1, NULL, 1);  
   #endif
+
+  #ifdef HAS_BUZZER
+    channelsound_setup();
+  #endif
   
   xTaskCreatePinnedToCore(net_task, "NET", 4096, NULL, 1, NULL, 1);
 
@@ -66,6 +71,7 @@ void setup() {
 
   xTaskCreatePinnedToCore(oscsender_task, "OSCSENDER", 8192, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(channelmessage_task, "CHANNELMESSAGE", 4096, NULL, 1, NULL, 1);
+  xTaskCreatePinnedToCore(channelsound_task, "CHANNELSOUND", 2048, NULL, 1, NULL, 1);
 }
 
 void loop() {

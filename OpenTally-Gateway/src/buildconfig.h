@@ -22,15 +22,18 @@
 #define CHANNEL_COUNT 33    
 
 // Define which buttons are the hardware buttons
-#define KEYPAD_HWBUTTONS_ACTIVE_HIGH true
-#define KEYPAD_HWBUTTON1 37 // 35
-#define KEYPAD_HWBUTTON2 38 // 0
-#define KEYPAD_GPIO_WAKEUP_SEL GPIO_SEL_37
+
 
 #define TALLY_LEDS_COUNT 9
 #define TALLY_LEDS_PIN 12
 
+#define BUZZER_PIN 17
+
 #ifdef BUILDCONFIG_GATEWAY
+    #define KEYPAD_HWBUTTONS_ACTIVE_HIGH false
+    #define KEYPAD_HWBUTTON1 35 // 35
+    #define KEYPAD_HWBUTTON2 0 // 0
+    #define KEYPAD_GPIO_WAKEUP_SEL GPIO_SEL_35
     #define HAS_KEYPAD_16KEYS
     #define HAS_KEYPAD_LEDS true
     #define IS_OSCSERVER
@@ -50,10 +53,15 @@
 #endif
 
 #ifdef BUILDCONFIG_TALLY
+    #define KEYPAD_HWBUTTONS_ACTIVE_HIGH true
+    #define KEYPAD_HWBUTTON1 37 // 35
+    #define KEYPAD_HWBUTTON2 38 // 0
+    #define KEYPAD_GPIO_WAKEUP_SEL GPIO_SEL_37
     #define OPENTALLY_DEVICE_TYPE 0
     #define IS_OSCCLIENT
     #define HOSTNAME_PREFIX "OTLight"
     #define APPEND_CHIPID_TO_HOSTNAME true    
     #define CONFIG_TITLE "OpenTally Light"
     #define HAS_TALLY_LEDS true
+    #define HAS_BUZZER
 #endif

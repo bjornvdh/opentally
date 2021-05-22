@@ -16,5 +16,5 @@ extern QueueHandle_t oscOutgoingMessageQueue;
 void oscdispatch_onairstate(OnAirState onAirState, int countDown);
 void oscdispatch_tallystate(int tallyChannel, bool preview, bool program);
 void oscdispatch_channelmessage(int tallyChannel, String message, uint32_t timeLeft);
-
+void oscdispatch_channelsound(int tallyChannel, uint32_t sound, uint32_t timeLeft);
 #endif

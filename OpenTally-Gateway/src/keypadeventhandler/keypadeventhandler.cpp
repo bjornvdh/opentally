@@ -9,6 +9,7 @@
 #include "sleep/sleep.h"
 #include "state/state_client_channel.h"
 #include "channelmessage/channelmessage.h"
+#include "channelmessage/channelsound.h"
 
 extern QueueHandle_t keypadEventQueue;
 
@@ -108,6 +109,19 @@ void process_keyaction(KeypadEventDef keypadEvent, ConfigAction actionCfg)
             
             onair_setstate((OnAirState) newState);
             break;
+        }
+        case KeyAction::SendSound:
+        {
+            Serial.println("[Keypad]::Send sound.");
+            numChannel = state_getselectedchannel();
+            if(actionCfg.Param1 != 0)
+                numChannel = actionCfg.Param1;
+            
+            if(numChannel != 0)
+            {
+                channelsound_set(numChannel, actionCfg.Param2.toInt());
+            }
+            break;            
         }
     }
 }

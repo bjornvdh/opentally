@@ -16,13 +16,14 @@ void display_gatewaystate()
     if(_lastGatewayState != newGatewayState || (!newGatewayState && _lastBlinkState != displayBlinkState))
     {
         uint32_t foreColor = newGatewayState ? TFT_GREEN : (displayBlinkState ? TFT_RED : TFT_DARKGREY);
-        tft.loadFont(AA_FONT_SMALL);        
+        //tft.loadFont(AA_FONT_SMALL);        
+        tft.setTextFont(2);
         tft.setTextDatum(MC_DATUM);
         tft.setTextColor(foreColor, TFT_BLACK);
         tft.fillRect(tft.width() - 100,0,20,20, TFT_BLACK);
         tft.setCursor(tft.width() - 90,2);
         tft.println("GW");
-        tft.unloadFont();
+        //tft.unloadFont();
         _lastGatewayState = newGatewayState;
         _lastBlinkState = displayBlinkState;
     }

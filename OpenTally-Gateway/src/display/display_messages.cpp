@@ -12,9 +12,20 @@ String _lastMessage;
 TFT_eSprite textSprite = TFT_eSprite(&tft);
 int _lastTextHeight = 25;
 const int _MESSAGE_TEXT_TOP = 40;
+const int _ALL_MESSAGES_TEXT_TOP = 30;
 
 void display_allmessages()
 {
+    String messages = channelmessage_getall();
+    if(messages != _lastMessage)
+    {
+        tft.setTextFont(2);
+        tft.fillRect(0,_ALL_MESSAGES_TEXT_TOP - 10,tft.width(), tft.height(), TFT_BLACK);
+        tft.setCursor(0, _ALL_MESSAGES_TEXT_TOP);
+        tft.setTextColor(TFT_WHITE);
+        tft.println(messages);
+        _lastMessage = messages;
+    }
 
 }
 
