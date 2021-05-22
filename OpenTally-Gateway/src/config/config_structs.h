@@ -12,7 +12,7 @@ struct LEDModeConfig
 
 struct LEDConfig
 {
-    bool BaseColor;     // Light the LED up in a dim, solid base color
+    int BaseColor;     // Light the LED up in a dim, solid base color
     LEDModeConfig SolidColor;
     LEDModeConfig Blink;
 };

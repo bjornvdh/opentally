@@ -100,3 +100,27 @@ void state_setchannelpreviewstate(int numChannel, bool state)
 
     oscdispatch_tallystate(numChannel, state, programState);
 }
+
+void state_setchannelprogrampreviewstate(int numChannel, bool preview, bool program)
+{
+    xSemaphoreTake(programPreviewStateMutex, portMAX_DELAY);
+    _channelProgramState[numChannel] = program;
+    _channelPreviewState[numChannel] = preview;
+    xSemaphoreGive(programPreviewStateMutex);
+
+    Serial.print("Channel ");
+    Serial.print(numChannel);
+    Serial.print(" preview ");
+    if(preview)
+        Serial.print(" ON ");
+    else
+        Serial.print(" off ");
+
+    Serial.print(" program ");
+    if(program)
+        Serial.println(" ON.");
+    else
+        Serial.println(" off.");
+
+    oscdispatch_tallystate(numChannel, preview, program);    
+}

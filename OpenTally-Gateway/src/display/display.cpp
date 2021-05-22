@@ -8,6 +8,7 @@
 #include "display/display_onair.h"
 #include "display/display_tallystatus.h"
 #include "display/display_gatewaystate.h"
+#include "display/display_atemstate.h"
 #include "display/display_messages.h"
 #include "sleep/sleep.h"
 
@@ -121,6 +122,7 @@ void display_task(void* parameters)
             if(OPENTALLY_DEVICE_TYPE == (int)OSCDeviceType::Gateway)
             {
                 display_allmessages();
+                display_atemstate();
             }
 
             xSemaphoreTake(displayRefreshRequestMutex, portMAX_DELAY);

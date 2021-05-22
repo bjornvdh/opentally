@@ -15,7 +15,7 @@
 
 CRGB leds[NUM_LEDS];
 
-const uint8_t COLOR_BASECOLOR[3] = {0,0,25};
+const uint8_t COLOR_BASECOLOR[8][3] = {{0,0,0}, {0,0,25}, {25,0,25}, {25,25,0},{0,25,25}, {12,25,12}, {25,25,25},{0,12,25}};
 const uint8_t COLOR_SELECTED_CHANNEL[3] = {255,200,0};
 const uint8_t COLOR_PREVIEW[3] = {0,180,0};
 const uint8_t COLOR_PROGRAM[3] = {255,0,0};
@@ -80,10 +80,7 @@ void setModeBasedLedColor(int numLed, LEDModeConfig modeConfig)
 
 inline void refreshSetBaseColor(int numLed, LEDConfig ledConfig)
 {
-    if(ledConfig.BaseColor)
-        leds[numLed].setRGB(0,0,25);
-    else
-        leds[numLed].setRGB(0,0,0);
+    setLedColor(numLed, COLOR_BASECOLOR[ledConfig.BaseColor]);
 }
 
 inline void refreshOverrideKeypad(int numLed)

@@ -19,12 +19,19 @@
 #include "channelmessage/channelmessage.h"
 #include "channelmessage/channelsound.h"
 #include "tallyleds/tallyleds.h"
+#include "atemswitcher/atemswitcher.h"
+#include "ledpanel/ledpanel.h"
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Booting...");
   
   display_setup();
+  
+  #ifdef HAS_LEDPANEL
+    ledpanel_setup();
+  #endif
+
   config_gateway_setup();
   keypad_setup();
   keypadeventhandler_setup();
@@ -38,6 +45,10 @@ void setup() {
 
   net_setup();
   state_clientchannel_setup();
+
+  #ifdef IS_ONAIRCONTROLLER
+    atemswitcher_setup();
+  #endif
 
   
   xTaskCreatePinnedToCore(display_task, "DISP", 4096, NULL, 1, NULL, 1);
@@ -58,6 +69,7 @@ void setup() {
     xTaskCreatePinnedToCore(onair_task, "ONAIR", 8192, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(onair_refresh_task, "ONAIR_REFRESH", 4096, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(tallystate_refresh_task, "TALLY_REFRESH", 4096, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(atemswitcher_task, "ATEMSWITCHER", 16384, NULL, 1, NULL, 1);
   #endif
 
   #ifdef IS_OSCSERVER
@@ -72,6 +84,10 @@ void setup() {
   xTaskCreatePinnedToCore(oscsender_task, "OSCSENDER", 8192, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(channelmessage_task, "CHANNELMESSAGE", 4096, NULL, 1, NULL, 1);
   xTaskCreatePinnedToCore(channelsound_task, "CHANNELSOUND", 2048, NULL, 1, NULL, 1);
+
+  #ifdef HAS_LEDPANEL
+    xTaskCreatePinnedToCore(ledpanel_task, "LEDPANEL", 8192, NULL, 1, NULL, 1);
+  #endif
 }
 
 void loop() {

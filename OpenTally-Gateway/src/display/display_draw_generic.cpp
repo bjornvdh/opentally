@@ -52,7 +52,8 @@ void display_draw_wifistatus()
         if(currentWifiDisplayMode != WIFIDISPLAY_CONFIGAP)
         tft.fillRect(WIFIICONRECT_LEFT, WIFIICONRECT_TOP, WIFIICONRECT_WIDTH, WIFIICONRECT_HEIGHT, TFT_BLACK);
 
-        tft.loadFont(AA_FONT_SMALL);
+        //tft.loadFont(AA_FONT_SMALL);
+        tft.setTextFont(2);
         tft.setTextDatum(TL_DATUM);
         tft.setCursor(WIFIICON_LEFT, WIFIICON_TOP);
         tft.setTextColor(TFT_RED);

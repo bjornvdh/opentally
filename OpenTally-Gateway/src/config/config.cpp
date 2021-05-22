@@ -16,7 +16,7 @@ LEDConfig _leds[16];
 void config_gateway_setup()
 {
     display_bootstep("Loading config...");
-    File jsonFile = SPIFFS.open("/config.json");
+    File jsonFile = SPIFFS.open(CONFIG_FILE_NAME);
     if(!jsonFile)
     {
         configIsValid = false;
@@ -34,7 +34,7 @@ void config_gateway_setup()
         for(int i = 0; i < 16; i++)
         {
             JsonObject jsonLed = root["led"][i];
-            _leds[i].BaseColor = jsonLed["bc"].as<bool>();
+            _leds[i].BaseColor = jsonLed["bc"].as<int>();
 
             _leds[i].SolidColor.Mode = (LedMode)jsonLed["c"]["m"].as<int>();
             _leds[i].SolidColor.Param1 = jsonLed["c"]["p1"].as<int>();

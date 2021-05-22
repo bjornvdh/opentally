@@ -47,6 +47,7 @@ void keypad_setup()
     #endif
 
     pinMode(KEYPAD_HWBUTTON1, INPUT);
+    pinMode(KEYPAD_HWBUTTON2, INPUT);
 
 
     keypadEventQueue = xQueueCreate(KEYPAD_QUEUE_LEN, sizeof(KeypadEventDef));
