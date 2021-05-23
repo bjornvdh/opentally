@@ -7,9 +7,9 @@
 // ONLY ONE should be enabled at any time.
 
 
-//#define BUILDCONFIG_GATEWAY
+#define BUILDCONFIG_GATEWAY
 //#define BUILDCONFIG_DISPLAY
-#define BUILDCONFIG_TALLY
+//#define BUILDCONFIG_TALLY
 
 // The hostname used by the gateway. 
 // The hostname this device uses is dependent on the chosen BUILDCONFIG

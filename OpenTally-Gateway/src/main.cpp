@@ -47,7 +47,7 @@ void setup() {
   state_clientchannel_setup();
 
   #ifdef IS_ONAIRCONTROLLER
-    atemswitcher_setup();
+    //atemswitcher_setup();
   #endif
 
   

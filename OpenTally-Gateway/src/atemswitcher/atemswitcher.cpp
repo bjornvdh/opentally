@@ -7,6 +7,7 @@
 #include <SPIFFS.h>
 #include <Wifi.h>
 
+#include "atemswitcher.h"
 #include "display/display.h"
 #include "display/display_bootstatus.h"
 #include "net/net.h"
@@ -22,6 +23,7 @@ struct AtemSwitcherCfg
 AtemSwitcherCfg atemSwitcherConfig;
 bool _atem_connect_started = false;
 bool _atem_switcher_is_connected = false;
+bool _setup_done = false;
 
 ATEMstd atemSwitcher;
 static SemaphoreHandle_t atemSwitcherMutex = xSemaphoreCreateMutex();
@@ -83,11 +85,17 @@ void handleAtemSwitcherConnection()
 {
     bool wifiIsConnected = net_wifiIsConnected();
     bool switcherIsConnected = atemSwitcher.isConnected();
-    
+
     if(wifiIsConnected && !switcherIsConnected)
     {
         try
         {
+            if(!_setup_done)
+            {
+                atemswitcher_setup();
+                _setup_done = true;
+            }
+
             Serial.println("[Atem Switcher]:: Atem connect attempt.");
             atemSwitcher.connect(); 
             switcherIsConnected = atemSwitcher.isConnected();
@@ -120,12 +128,12 @@ bool atemswithcer_isconnected()
 
 void atemswitcher_setup()
 {
-    display_bootstep("Initializing ATEM switcher...");
+    Serial.println("[Atem Switcher]:: Initializing...");
 
     readAtemSwitcherConfig();
     atemSwitcher.begin(atemSwitcherConfig.IpAddress);
 
-    display_bootstepresult(true);
+    //display_bootstepresult(true);
 }
 
 void atemswitcher_task(void* params)
