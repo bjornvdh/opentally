@@ -142,7 +142,7 @@ void atemswitcher_task(void* params)
     {
         handleAtemSwitcherConnection();
         atemSwitcher.runLoop();
-
+        
         if(atemSwitcher.isConnected())
         {
             for(int i = 1; i < CHANNEL_COUNT; i++)

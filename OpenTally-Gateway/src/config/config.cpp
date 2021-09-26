@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <ArduinoJSON.h>
+#include <ArduinoJson.h>
 #include <FS.h>
 #include <SPIFFS.h>
 #include "buildconfig.h"

@@ -21,6 +21,7 @@
 #include "tallyleds/tallyleds.h"
 #include "atemswitcher/atemswitcher.h"
 #include "ledpanel/ledpanel.h"
+#include "webapp/webapp.h"
 
 void setup() {
   Serial.begin(115200);
@@ -46,8 +47,9 @@ void setup() {
   net_setup();
   state_clientchannel_setup();
 
-  #ifdef IS_ONAIRCONTROLLER
+  #ifdef IS_ONAIR_CONTROLLER
     //atemswitcher_setup();
+    webapp_setup();
   #endif
 
   
@@ -70,6 +72,7 @@ void setup() {
     xTaskCreatePinnedToCore(onair_refresh_task, "ONAIR_REFRESH", 4096, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(tallystate_refresh_task, "TALLY_REFRESH", 4096, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(atemswitcher_task, "ATEMSWITCHER", 16384, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(webapp_task, "WEBAPP", 8192, NULL, 1, NULL, 1);
   #endif
 
   #ifdef IS_OSCSERVER
